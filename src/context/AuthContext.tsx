@@ -13,7 +13,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isGuest, setIsGuest] = useState(true);
-  const [name, setName] = useState("Guest");
+  const [name, setName] = useState("a");
   const [isSyncEnabled, setSyncEnabled] = useState(false);
 
   const signIn = (userName: string, guest = false) => {
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = () => {
-    setName("Guest");
+    setName("");
     setIsGuest(true);
     setSyncEnabled(false);
   };

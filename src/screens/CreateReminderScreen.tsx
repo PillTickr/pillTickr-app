@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { schedulePushNotification } from "../utils/notifications";
+import { saveReminder } from "../storage/reminderStorage";
+// import uuid from "react-native-uuid";
 
 export default function CreateReminderScreen({ navigation }: any) {
     const [name, setName] = useState("");
@@ -18,12 +20,20 @@ export default function CreateReminderScreen({ navigation }: any) {
     const [showPicker, setShowPicker] = useState(false);
 
     const handleSave = async () => {
-        const timeStr = `${time.getHours().toString().padStart(2, "0")}:${time
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")}`;
-        console.log("Scheduling notification for", name, "at", timeStr);
-        await schedulePushNotification(name, timeStr);
+        const newReminder = {
+            id: Math.random().toString(36).substring(7),
+            name,
+            dosage,
+            times: [time.toISOString()], // save as ISO string
+            startDate: new Date().toISOString().split("T")[0],
+            endDate: new Date().toISOString().split("T")[0],
+            notes: "",
+            isRecurring: false,
+            isActive: true,
+        };
+
+        await saveReminder(newReminder);
+        await schedulePushNotification(name, time);
         navigation.goBack();
     };
 

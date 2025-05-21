@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { Button } from "react-native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { getReminders } from "../storage/reminderStorage";
+import { useAuth } from "../context/AuthContext";
 
 type Reminder = {
     id: string;
@@ -15,36 +16,26 @@ type Reminder = {
     isActive: boolean;
 };
 
-// Sample data
-const reminders: Reminder[] = [
-    {
-        id: "1",
-        name: "Paracetamol",
-        dosage: "500mg",
-        times: ["08:00", "14:00", "20:00"],
-        startDate: "2025-05-20",
-        endDate: "2025-05-25",
-        notes: "Take after meals",
-        isRecurring: true,
-        isActive: true,
-    },
-    {
-        id: "2",
-        name: "Ibuprofen",
-        dosage: "400mg",
-        times: ["09:00", "21:00"],
-        startDate: "2025-05-20",
-        endDate: "2025-05-22",
-        notes: "With food to avoid stomach upset",
-        isRecurring: false,
-        isActive: true,
-    },
-];
-
 export default function HomeScreen() {
     const navigation = useNavigation();
+    const isFocused = useIsFocused();
+    const [reminders, setReminders] = useState<Reminder[]>([]);
+    const {name}= useAuth();
+
+    useEffect(() => {
+        if (isFocused) {
+            loadReminders();
+        }
+    }, [isFocused]);
+
+    const loadReminders = async () => {
+        const data = await getReminders();
+        setReminders(data);
+    };
+
     return (
         <View style={styles.container}>
+            <Text style={styles.header}>Hi {name} </Text>
             <Text style={styles.header}>🕒 Today's Reminders</Text>
             <FlatList
                 data={reminders}
@@ -55,22 +46,34 @@ export default function HomeScreen() {
                         <Text style={styles.title}>{item.name}</Text>
                         <Text style={styles.subtitle}>{item.dosage}</Text>
                         <Text style={styles.time}>
-                            🕑 {item.times.join(", ")}
+                            🕑{" "}
+                            {item.times
+                                .map((t) =>
+                                    new Date(t).toLocaleTimeString([], {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    })
+                                )
+                                .join(", ")}
                         </Text>
-                        <Text style={styles.notes}>{item.notes}</Text>
+                        {item.notes ? (
+                            <Text style={styles.notes}>{item.notes}</Text>
+                        ) : null}
                     </View>
                 )}
+                ListEmptyComponent={
+                    <Text style={{ marginTop: 20, color: "#777" }}>
+                        No reminders yet.
+                    </Text>
+                }
             />
-            {/* <Button
-                title="➕ Add Reminder"
-                onPress={() => navigation.navigate("CreateReminder")}
-                color="#007AFF"
-            /> */}
             <Pressable
                 style={styles.button}
-                onPress={() => navigation.navigate("CreateReminder")}
+                onPress={() => navigation.navigate("CreateReminder" as never)}
             >
-                <Text>+ Add Reminder</Text>
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                    + Add Reminder
+                </Text>
             </Pressable>
         </View>
     );

@@ -25,13 +25,13 @@ import * as Notifications from "expo-notifications";
  * @param name - The name of the medicine or reminder.
  * @param time - Time string in "HH:mm" 24-hour format.
  */
-export async function schedulePushNotification(name: string, time: string) {
-    const [hour, minute] = time.split(":").map(Number);
-    const trigger = new Date();
-    trigger.setHours(hour);
-    trigger.setMinutes(minute);
-    trigger.setSeconds(0);
-    console.log("Scheduling notification at", trigger);
+export async function schedulePushNotification(name: string, time: Date) {
+    // const [hour, minute] = time.split(":").map(Number);
+    // const trigger = new Date();
+    // trigger.setHours(hour);
+    // trigger.setMinutes(minute);
+    // trigger.setSeconds(0);
+    console.log("Scheduling notification at", time.toISOString());
     await Notifications.scheduleNotificationAsync({
         content: {
             title: `⏰ Reminder: ${name}`,
@@ -42,7 +42,7 @@ export async function schedulePushNotification(name: string, time: string) {
         },
         trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: trigger,
+            date: time,
         },
     });
 }
