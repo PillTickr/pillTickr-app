@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
-import { getReminders } from "../storage/reminderStorage";
+import { useReminders } from "@/src/hooks/useReminder";
 import { useAuth } from "../context/AuthContext";
 
 type Reminder = {
@@ -17,19 +17,24 @@ type Reminder = {
 };
 
 export default function HomeScreen() {
+    const { getReminders } = useReminders();
     const navigation = useNavigation();
     const isFocused = useIsFocused();
     const [reminders, setReminders] = useState<Reminder[]>([]);
-    const {name}= useAuth();
+    const { name, isLoading } = useAuth();
 
     useEffect(() => {
-        if (isFocused) {
-            loadReminders();
+        if (!name) {
+            navigation.navigate("Welcome" as never);
         }
-    }, [isFocused]);
+        // if (isFocused && !isLoading) {
+            loadReminders();
+        // }
+    }, [isFocused, isLoading, name]);
 
     const loadReminders = async () => {
         const data = await getReminders();
+        // console.log("Loaded reminders:", data);
         setReminders(data);
     };
 
@@ -69,7 +74,7 @@ export default function HomeScreen() {
             />
             <Pressable
                 style={styles.button}
-                onPress={() => navigation.navigate("CreateReminder" as never)}
+                onPress={() => navigation.navigate("Create Reminder" as never)}
             >
                 <Text style={{ color: "white", fontWeight: "bold" }}>
                     + Add Reminder

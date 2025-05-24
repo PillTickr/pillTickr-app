@@ -10,10 +10,11 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { schedulePushNotification } from "../utils/notifications";
-import { saveReminder } from "../storage/reminderStorage";
+import { useReminders } from "@/src/hooks/useReminder";
 // import uuid from "react-native-uuid";
 
 export default function CreateReminderScreen({ navigation }: any) {
+    const { createReminder } = useReminders();
     const [name, setName] = useState("");
     const [dosage, setDosage] = useState("");
     const [time, setTime] = useState(new Date());
@@ -21,7 +22,7 @@ export default function CreateReminderScreen({ navigation }: any) {
 
     const handleSave = async () => {
         const newReminder = {
-            id: Math.random().toString(36).substring(7),
+            // id: Math.random().toString(36).substring(7),
             name,
             dosage,
             times: [time.toISOString()], // save as ISO string
@@ -32,7 +33,7 @@ export default function CreateReminderScreen({ navigation }: any) {
             isActive: true,
         };
 
-        await saveReminder(newReminder);
+        await createReminder(newReminder);
         await schedulePushNotification(name, time);
         navigation.goBack();
     };
