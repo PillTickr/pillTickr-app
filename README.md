@@ -1,80 +1,50 @@
-src/
-├── screens/
-│   ├── SplashScreen.tsx
-│   ├── SignInScreen.tsx
-│   ├── HomeScreen.tsx
-│   ├── CreateReminderScreen.tsx
-│   └── ProfileScreen.tsx
-├── context/
-│   └── AuthContext.tsx
-├── storage/
-│   ├── reminderStorage.ts
-│   └── userStorage.ts
-├── utils/
-│   └── supabase.ts
-└── App.tsx
+# Welcome to your Expo app 👋
 
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Get started
 
-## 📱 **PillTickr App Flow**
+1. Install dependencies
 
-### 🧭 First-Time Launch
+   ```bash
+   npm install
+   ```
 
-1. **Welcome Screen:**
+2. Start the app
 
-   * Options:
+   ```bash
+   npx expo start
+   ```
 
-     * **Continue as Guest** → ask for name
-     * **Sign in with Email** (via NextAuth or Firebase)
-     * **Sign in with Google**
-2. **After login/guest entry** → navigate to **HomeScreen**
+In the output, you'll find options to open the app in a
 
----
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-### 🏠 **Home Screen**
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-* Greeting message (e.g., “Hi \[User] 👋”)
-* **FAB**: “+ Add Reminder”
-* List of upcoming reminders
-* Slide-out **Sidebar / Drawer Menu**:
+## Get a fresh project
 
-  * Profile
-  * Settings
-  * Help / About
-  * Sign out (if logged in)
+When you're ready, run:
 
----
+```bash
+npm run reset-project
+```
 
-### ➕ **Add Reminder Flow**
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-* Input:
+## Learn more
 
-  * Medicine Name
-  * Dosage
-  * One or more Time(s) per day (with DateTimePicker)
-  * Optional: Notes
-* Store reminder **locally**
-* If sync is enabled and user is logged in → also upload to cloud
+To learn more about developing your project with Expo, look at the following resources:
 
----
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-### 👤 **Profile / Settings**
+## Join the community
 
-* View and edit **display name**
-* **Sync with Cloud** toggle (enabled only if user is signed in)
-* If guest:
+Join our community of developers creating universal apps.
 
-  * Show notice: “Create an account to enable sync”
-* Sign in / Sign out button
-
----
-
-### 💾 **Storage Strategy**
-
-* Local: Use `AsyncStorage` or `SQLite` (for structured reminders)
-* Cloud: Firebase Firestore or Supabase (optional sync)
-
-  * Store reminders under user ID/email
-  * Sync on app start + manual sync toggle
-
----
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
