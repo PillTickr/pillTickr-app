@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Button, StyleSheet } from "react-native";
 
 import { HelloWave } from "@/components/hello-wave";
 import { ThemedText } from "@/components/themed-text";
@@ -7,7 +7,7 @@ import { Link } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <ThemedView style={{ flex: 1 }}>
@@ -19,7 +19,7 @@ export default function Home() {
           marginTop: 20,
         }}
       >
-        Welcome to PillTickr! {user?.name ?? ""}
+        Welcome to PillTickr! {user?.name}
       </ThemedText>
       <ThemedText
         style={{
@@ -89,6 +89,7 @@ export default function Home() {
             Add Your First Medication
           </ThemedText>
         </Link>
+        <Button title="Logout" onPress={logout} color="#FF3B30" />
       </ThemedView>
     </ThemedView>
   );

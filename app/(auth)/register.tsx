@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
+import { registerAPI } from "../api/auth/register";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -11,6 +11,7 @@ export default function RegisterScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [dob, setDob] = useState("");
 
   useEffect(() => {
@@ -20,18 +21,16 @@ export default function RegisterScreen() {
   }, [user, router]);
 
   const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
     try {
-      await axios.post("http://localhost:8090/api/auth/signup", {
-        name,
-        email,
-        password,
-        dob,
-      });
-      alert("Registered! Please login.");
-      router.replace("../login");
-    } catch (err) {
-      console.error(err);
-      alert("Registration failed");
+      await registerAPI({ email, password, name, dob });
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert("Registration failed. Please try again.");
     }
   };
 
@@ -48,6 +47,16 @@ export default function RegisterScreen() {
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
+        style={styles.input}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      <TextInput
+        placeholder="Password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
         style={styles.input}
       />
       <TextInput
@@ -75,5 +84,12 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", padding: 20 },
   title: { fontSize: 24, marginBottom: 20, textAlign: "center" },
-  input: { borderWidth: 1, padding: 10, marginBottom: 10, borderRadius: 5 },
+  input: {
+    borderWidth: 1,
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+    color: "white",
+    borderColor: "gray",
+  },
 });

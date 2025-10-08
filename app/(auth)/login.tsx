@@ -1,29 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TextInput, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
+import { loginAPI } from "../api/auth/login";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, user } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-      router.replace("/(tabs)");
-    }
-  }, [user, router]);
-
   const handleLogin = async () => {
-    const res = await axios.post("http://localhost:8090/api/auth/login", {
-      email,
-      password,
-    });
-    await login(res.data.token, res.data.user);
+    try {
+      await loginAPI({ email, password });
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert("Registration failed. Please try again.");
+    }
   };
 
   return (
