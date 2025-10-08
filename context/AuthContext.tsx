@@ -6,13 +6,15 @@ import React, {
   useEffect,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useRouter } from "expo-router";
+import { User } from "@/types/User";
 
 type AuthContextType = {
-  user: any | null;
-  token: string | null;
-  login: (token: string, user: any) => Promise<void>;
+  user?: User;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -21,38 +23,93 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   const [user, setUser] = useState<any | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const isTokenExpired = (token: string) => {
+    try {
+      const [, payload] = token.split(".");
+      const decoded = JSON.parse(atob(payload));
+      const currentTime = Date.now() / 1000;
+      return decoded.exp < currentTime;
+    } catch {
+      return true;
+    }
+  };
 
   useEffect(() => {
-    const loadAuth = async () => {
-      const authData = await AsyncStorage.getItem("auth");
-      if (authData) {
-        console.log(authData);
-        // TODO: validate token (e.g., check expiry)
-        const { token, user } = JSON.parse(authData);
-        setToken(token);
+    const refreshAccessToken = async () => {
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        console.warn("No refresh token found.");
+        await logout();
+        return;
+      }
+
+      try {
+        const res = await axios.post("http://localhost:8090/api/auth/refresh", {
+          refreshToken,
+        });
+
+        const { accessToken, refreshToken: newRefreshToken, user } = res.data;
+
+        await AsyncStorage.setItem("user", JSON.stringify(user));
+        await AsyncStorage.setItem("accessToken", accessToken);
+        await AsyncStorage.setItem("refreshToken", newRefreshToken);
+
         setUser(user);
+      } catch (err) {
+        console.error("Token refresh failed:", err);
+        await logout();
+      }
+    };
+
+    const loadAuth = async () => {
+      const storedUser = await AsyncStorage.getItem("user");
+      const token = await AsyncStorage.getItem("accessToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+      if (storedUser && token && refreshToken) {
+        if (isTokenExpired(token)) {
+          await refreshAccessToken();
+        } else {
+          setUser(JSON.parse(storedUser));
+        }
       } else {
         router.push("/(auth)/login");
       }
+      setIsLoading(false);
     };
     loadAuth();
   }, [router]);
 
-  const login = async (token: string, user: any) => {
-    setToken(token);
-    setUser(user);
-    await AsyncStorage.setItem("auth", JSON.stringify({ token, user }));
+  // 🔐 Login logic moved here
+  const login = async (email: string, password: string) => {
+    try {
+      const res = await axios.post("http://localhost:8090/api/auth/login", {
+        email,
+        password,
+      });
+
+      const { refreshToken, user, accessToken } = res.data;
+      setUser(user);
+
+      await AsyncStorage.setItem("user", JSON.stringify(user));
+      await AsyncStorage.setItem("accessToken", accessToken);
+      await AsyncStorage.setItem("refreshToken", refreshToken);
+    } catch (err) {
+      console.error("Login failed:", err);
+      throw err;
+    }
   };
 
+  // 🚪 Logout
   const logout = async () => {
-    setToken(null);
     setUser(null);
-    await AsyncStorage.removeItem("auth");
+    await AsyncStorage.multiRemove(["user", "accessToken", "refreshToken"]);
+    router.push("/(auth)/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
